@@ -1,1 +1,328 @@
 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字花游戏 - 28倍赔率</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Microsoft YaHei', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            text-align: center;
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(245, 87, 108, 0.5);
+        }
+
+        .odds {
+            font-size: 1.2em;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+
+        .betting-area {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .number-btn {
+            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .number-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .number-btn.selected {
+            background: linear-gradient(145deg, #f093fb 0%, #f5576c 100%);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(245, 87, 108, 0.6);
+        }
+
+        .controls {
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 12px 30px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #eb3349 0%, #f45c43 100%);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(244, 92, 67, 0.4);
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+
+        .info-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 15px;
+        }
+
+        .result-area {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="goBack()">←</button>
+    
+    <div class="game-container">
+        <h1>🎋 字花游戏</h1>
+        <div class="odds">💰 1赔28 | 28个数字可选</div>
+        
+        <div class="info-panel">
+            <div class="info-item">
+                <div>💵 余额</div>
+                <div id="balance">1000</div>
+            </div>
+            <div class="info-item">
+                <div>💸 下注</div>
+                <div id="betAmount">0</div>
+            </div>
+            <div class="info-item">
+                <div>🎯 选中</div>
+                <div id="selectedNumber">-</div>
+            </div>
+        </div>
+
+        <div class="betting-area">
+            <h3>选择你的幸运数字 (1-28)</h3>
+            <div class="number-grid" id="numberGrid">
+                <!-- 数字按钮将通过JavaScript生成 -->
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="range" id="betSlider" min="10" max="100" value="10" style="width: 200px; margin: 0 10px;">
+            <span id="sliderValue">10</span>
+            <button class="btn" onclick="placeBet()" id="betBtn">下注</button>
+            <button class="btn btn-danger" onclick="clearSelection()">清空</button>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <h3>🎉 开奖结果</h3>
+            <div class="result-number" id="resultNumber">?</div>
+            <p id="resultText">
+            <p id="winningsText">
+        </div>
+    </div>
+
+    <script>
+        let balance = 1000;
+        let selectedNumber = null;
+        let currentBet = 10;
+        let gameHistory = [];
+
+        // 初始化数字网格
+        function initNumberGrid() {
+            const grid = document.getElementById('numberGrid');
+            for (let i = 1; i <= 28; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.textContent = i;
+                btn.onclick = () => selectNumber(i, btn);
+                grid.appendChild(btn);
+            }
+        }
+
+        // 选择数字
+        function selectNumber(num, btnElement) {
+            // 移除其他选中状态
+            document.querySelectorAll('.number-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 选中当前数字
+            btnElement.classList.add('selected');
+            selectedNumber = num;
+            document.getElementById('selectedNumber').textContent = num;
+            
+            // 启用下注按钮
+            document.getElementById('betBtn').disabled = false;
+        }
+
+        // 更新滑块显示
+        document.getElementById('betSlider').addEventListener('input', function() {
+            currentBet = parseInt(this.value);
+            document.getElementById('sliderValue').textContent = currentBet;
+            document.getElementById('betAmount').textContent = currentBet;
+        });
+
+        // 清空选择
+        function clearSelection() {
+            selectedNumber = null;
+            document.querySelectorAll('.number-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.getElementById('selectedNumber').textContent = '-';
+            document.getElementById('betBtn').disabled = true;
+        }
+
+        // 下注
+        function placeBet() {
+            if (!selectedNumber) {
+                alert('请先选择一个数字！');
+                return;
+            }
+            
+            if (currentBet > balance) {
+                alert('余额不足！');
+                return;
+            }
+
+            // 扣除下注金额
+            balance -= currentBet;
+            updateDisplay();
+
+            // 模拟开奖 (这里用随机数，实际项目中应该连接真实的开奖系统)
+            setTimeout(() => {
+                const winningNumber = Math.floor(Math.random() * 28) + 1;
+                const isWin = selectedNumber === winningNumber;
+                
+                // 显示结果
+                document.getElementById('resultNumber').textContent = winningNumber;
+                document.getElementById('resultArea').style.display = 'block';
+                
+                if (isWin) {
+                    const winnings = currentBet * 28;
+                    balance += winnings;
+                    document.getElementById('resultText').innerHTML = `🎊 恭喜中奖！`;
+                    document.getElementById('winningsText').innerHTML = `💰 赢得 <span style="color: #38ef7d; font-size: 1.5em;">${winnings}</span> 金币！`;
+                } else {
+                    document.getElementById('resultText').innerHTML = `😢 很遗憾，未中奖`;
+                    document.getElementById('winningsText').innerHTML = `💔 下次好运！`;
+                }
+                
+                updateDisplay();
+                
+                // 记录历史
+                gameHistory.push({
+                    number: selectedNumber,
+                    bet: currentBet,
+                    result: winningNumber,
+                    win: isWin,
+                    time: new Date().toLocaleTimeString()
+                });
+                
+            }, 1000);
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            document.getElementById('balance').textContent = balance;
+            document.getElementById('betAmount').textContent = currentBet;
+        }
+
+        // 返回上一页
+        function goBack() {
+            if (confirm('确定要返回首页吗？当前游戏进度将丢失。')) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // 初始化
+        window.onload = function() {
+            initNumberGrid();
+            updateDisplay();
+        };
+    </script>
+</body>
+</html>
